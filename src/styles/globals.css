@@ -1,0 +1,28 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-surface-base text-brand-gray-700 antialiased;
+  }
+  ::selection {
+    @apply bg-brand-lilac-300/50 text-brand-gray-900;
+  }
+}
+
+.skip-to-content {
+    @apply sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:right-4 focus:px-4 focus:py-2 focus:bg-brand-yellow-400 focus:text-brand-gray-900 focus:rounded-md focus:font-bold;
+}
+
+.back-to-top {
+    @apply fixed bottom-8 left-8 z-50 p-3 bg-brand-gray-900 text-white rounded-full shadow-lg transition-opacity duration-300 hover:bg-brand-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue-300;
+}
+
+.hover\:pause:hover {
+    animation-play-state: paused;
+}
