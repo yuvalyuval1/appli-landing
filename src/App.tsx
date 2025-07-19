@@ -1,6 +1,3 @@
-
-import React from 'react';
-
 // Components
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
@@ -16,12 +13,19 @@ import BackToTopButton from '@/components/BackToTopButton';
 // Context
 import { ModalProvider } from '@/contexts/ModalContext';
 
+// Vercel Analytics
+import { Analytics } from '@vercel/analytics/react';
+
 export default function App() {
   return (
     <ModalProvider>
       <div dir="rtl">
-        <a href="#main-content" className="skip-to-content">דלג לתוכן המרכזי</a>
+        <a href="#main-content" className="skip-to-content">
+          דלג לתוכן המרכזי
+        </a>
+
         <Header />
+
         <main id="main-content">
           <HeroSection />
           <TrustBarSection />
@@ -30,10 +34,15 @@ export default function App() {
           <PricingSection />
           <FaqSection />
         </main>
+
         <Footer />
+
         <ContactModal />
         <BackToTopButton />
       </div>
+
+      {/* ✨ Vercel Analytics */}
+      <Analytics />
     </ModalProvider>
   );
 }
