@@ -15,22 +15,26 @@ const HeroSection: React.FC = () => {
         text-white bg-gradient-to-b from-blue-400 via-purple-300 to-pink-200 overflow-hidden
       "
     >
-      {/* שם האתר */}
-      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
-        <span className="uppercase text-2xl md:text-3xl font-bold tracking-widest drop-shadow-lg">
-          APPLI
-        </span>
-      </div>
-
-      {/* רקע כהה קל כדי לשפר קונטרסט */}
+      {/* overlay כהה לשיפור קונטרסט */}
       <div className="absolute inset-0 bg-black/20"></div>
 
-      <div className="relative container mx-auto px-6 z-30 space-y-6">
-        {/* כותרת */}
+      {/* תוכן מרכזי */}
+      <div className="relative container mx-auto px-6 z-30 flex flex-col items-center space-y-4">
+        {/* APPLI ממש מעל הכותרת */}
+        <motion.span
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="uppercase text-3xl sm:text-4xl md:text-5xl font-bold tracking-widest drop-shadow-lg"
+        >
+          APPLI
+        </motion.span>
+
+        {/* כותרת ראשית */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold drop-shadow-xl"
         >
           העסק שלך, דיגיטלי, בקלות.
@@ -40,8 +44,8 @@ const HeroSection: React.FC = () => {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="max-w-3xl mx-auto text-base sm:text-lg md:text-xl text-white/90"
+          transition={{ duration: 0.6, delay: 0.45 }}
+          className="max-w-3xl text-base sm:text-lg md:text-xl text-white/90"
         >
           אנחנו בונים אתרים ואפליקציות שפשוט עובדים. מהר, יפה וחכם.
           הפתרון הדיגיטלי שלך מתחיל כאן.
@@ -51,7 +55,7 @@ const HeroSection: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
         >
           <button
             onClick={() => openModal()}
