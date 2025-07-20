@@ -48,9 +48,12 @@ const Header: React.FC = () => {
         </a>
 
         {/* ניווט שולחן עבודה */}
-        <ul className="hidden md:flex items-center space-x-8 lg:space-x-12">
-          {navLinks.map(link => (
-            <li key={link.name}>
+        <ul className="hidden md:flex items-center">
+          {navLinks.map((link, idx) => (
+            <li
+              key={link.name}
+              className={idx < navLinks.length - 1 ? 'mr-8 lg:mr-12' : ''}
+            >
               <a
                 href={link.href}
                 className="text-brand-gray-700 hover:text-brand-blue-300 transition-colors font-medium"
@@ -106,9 +109,12 @@ const Header: React.FC = () => {
               role="dialog"
               aria-modal="true"
             >
-              <ul className="flex flex-col space-y-8">
-                {navLinks.map(link => (
-                  <li key={link.name}>
+              <ul className="flex flex-col">
+                {navLinks.map((link, idx) => (
+                  <li
+                    key={link.name}
+                    className={idx < navLinks.length - 1 ? 'mb-6' : ''}
+                  >
                     <a
                       href={link.href}
                       onClick={toggleMenu}
@@ -121,7 +127,10 @@ const Header: React.FC = () => {
               </ul>
 
               <button
-                onClick={() => { toggleMenu(); openModal(); }}
+                onClick={() => {
+                  toggleMenu();
+                  openModal();
+                }}
                 className="
                   mt-12 w-full bg-brand-gray-900 text-white
                   px-6 py-3 rounded-lg font-bold text-lg
