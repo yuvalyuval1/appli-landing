@@ -1,3 +1,4 @@
+// src/components/HeroSection.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from '@/components/Icons';
@@ -53,7 +54,7 @@ const HeroSection: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.6 }}
         >
           <button
-            onClick={openModal}
+            onClick={() => openModal()}
             className="
               inline-block bg-white text-blue-600 px-8 py-3 rounded-full text-base sm:text-lg font-bold
               hover:bg-white/90 focus:outline-none focus:ring-4 focus:ring-white/50
