@@ -47,13 +47,10 @@ const Header: React.FC = () => {
           <Logo className="h-7 text-brand-gray-900" />
         </a>
 
-        {/* ניווט שולחן עבודה */}
-        <ul className="hidden md:flex items-center">
-          {navLinks.map((link, idx) => (
-            <li
-              key={link.name}
-              className={idx < navLinks.length - 1 ? 'mr-8 lg:mr-12' : ''}
-            >
+        {/* ניווט שולחן עבודה – gap במקום margin */}
+        <ul className="hidden md:flex items-center gap-x-8 lg:gap-x-12">
+          {navLinks.map(link => (
+            <li key={link.name}>
               <a
                 href={link.href}
                 className="text-brand-gray-700 hover:text-brand-blue-300 transition-colors font-medium"
@@ -88,7 +85,7 @@ const Header: React.FC = () => {
         </div>
       </nav>
 
-      {/* תפריט נפתח במובייל */}
+      {/* תפריט נפתח במובייל – gap-y במקום mb */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -109,12 +106,9 @@ const Header: React.FC = () => {
               role="dialog"
               aria-modal="true"
             >
-              <ul className="flex flex-col">
-                {navLinks.map((link, idx) => (
-                  <li
-                    key={link.name}
-                    className={idx < navLinks.length - 1 ? 'mb-6' : ''}
-                  >
+              <ul className="flex flex-col gap-y-6">
+                {navLinks.map(link => (
+                  <li key={link.name}>
                     <a
                       href={link.href}
                       onClick={toggleMenu}
@@ -127,10 +121,7 @@ const Header: React.FC = () => {
               </ul>
 
               <button
-                onClick={() => {
-                  toggleMenu();
-                  openModal();
-                }}
+                onClick={() => { toggleMenu(); openModal(); }}
                 className="
                   mt-12 w-full bg-brand-gray-900 text-white
                   px-6 py-3 rounded-lg font-bold text-lg
