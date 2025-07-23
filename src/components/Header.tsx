@@ -17,7 +17,7 @@ const Header: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const { openModal } = useModal();
 
-  /* מעקב גלילה */
+  /* גלילה: צבע‑רקע, כיוון, פס‑התקדמות */
   useEffect(() => {
     let lastY = 0;
     const onScroll = () => {
@@ -36,7 +36,7 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* נעילת גלילה + ESC */
+  /* ESC + נעילת‑גלילה */
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'auto';
     const onKey = (e: KeyboardEvent) =>
@@ -46,6 +46,7 @@ const Header: React.FC = () => {
   }, [isOpen]);
 
   const toggleMenu = () => setIsOpen(p => !p);
+  const closeMenu  = () => setIsOpen(false);
 
   const headerBg =
     isOpen
@@ -56,14 +57,14 @@ const Header: React.FC = () => {
 
   return (
     <>
-      {/* progress bar */}
+      {/* פס התקדמות גלילה */}
       <motion.div
         className="fixed top-0 left-0 h-0.5 bg-brand-blue-300 z-50 origin-left"
         style={{ width: `${progress}%` }}
         transition={{ ease: 'linear', duration: 0.1 }}
       />
 
-      {/* header */}
+      {/* Header */}
       <motion.header
         className={`fixed inset-x-0 z-40 transition-colors duration-300 ${headerBg}`}
         animate={{ y: scrollDirUp || isOpen ? 0 : -96 }}
@@ -74,7 +75,7 @@ const Header: React.FC = () => {
             <Logo className="h-7 text-brand-gray-900" />
           </a>
 
-          {/* ניווט בדסקטופ */}
+          {/* ניווט דסקטופ */}
           <ul className="hidden md:flex items-center gap-x-8 lg:gap-x-12">
             {navLinks.map(link => (
               <li key={link.name}>
@@ -82,6 +83,7 @@ const Header: React.FC = () => {
                   href={link.href}
                   className="relative font-medium text-brand-gray-700 hover:text-brand-blue-300 transition-colors"
                   whileHover="hover"
+                  onClick={closeMenu}
                 >
                   {link.name}
                   <motion.span
@@ -95,7 +97,7 @@ const Header: React.FC = () => {
             ))}
           </ul>
 
-          {/* כפתורים צדיים */}
+          {/* כפתורי צד */}
           <div className="flex items-center gap-4 md:gap-6">
             <button
               onClick={() => openModal()}
@@ -108,20 +110,23 @@ const Header: React.FC = () => {
               דברו איתנו
             </button>
 
+            {/* כפתור המבורגר – נעלם (opacity‑0) כשהתפריט פתוח */}
             <motion.button
               onClick={toggleMenu}
-              className="md:hidden z-50 text-brand-gray-900"
+              className={`md:hidden z-50 text-brand-gray-900 transition-opacity ${
+                isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+              }`}
               aria-label="פתח תפריט"
               aria-expanded={isOpen}
               whileTap={{ scale: 0.9, rotate: 90 }}
             >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <Menu className="w-6 h-6" />
             </motion.button>
           </div>
         </nav>
       </motion.header>
 
-      {/* תפריט מובייל */}
+      {/* מגירת מובייל */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -129,7 +134,7 @@ const Header: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 z-50"
-            onClick={toggleMenu}
+            onClick={closeMenu}           /* קליק מחוץ למגירה = סגירה */
             aria-hidden="true"
           >
             <motion.div
@@ -138,14 +143,14 @@ const Header: React.FC = () => {
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
               className="fixed top-0 right-0 h-full w-full max-w-sm bg-surface-base shadow-lg p-8 pt-24 z-50"
-              onClick={e => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}  /* מונע סגירה עצמית */
               role="dialog"
               aria-modal="true"
             >
-              {/* כפתור סגירה במגירה */}
+              {/* כפתור סגירה בתוך המגירה */}
               <motion.button
-                onClick={toggleMenu}
-                className="absolute top-6 left-6 text-brand-gray-900"
+                onClick={closeMenu}
+                className="absolute top-6 right-6 text-brand-gray-900"
                 aria-label="סגור תפריט"
                 whileTap={{ scale: 0.9, rotate: -90 }}
               >
@@ -157,7 +162,7 @@ const Header: React.FC = () => {
                   <li key={link.name}>
                     <a
                       href={link.href}
-                      onClick={toggleMenu}
+                      onClick={closeMenu}
                       className="text-2xl font-semibold text-brand-gray-900 hover:text-brand-blue-300"
                     >
                       {link.name}
@@ -168,7 +173,7 @@ const Header: React.FC = () => {
 
               <button
                 onClick={() => {
-                  toggleMenu();
+                  closeMenu();
                   openModal();
                 }}
                 className="
