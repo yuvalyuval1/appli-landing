@@ -11,14 +11,13 @@ const navLinks = [
 ];
 
 const Header: React.FC = () => {
-  /* state */
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollDirUp, setScrollDirUp] = useState(true);
   const [progress, setProgress] = useState(0);
   const { openModal } = useModal();
 
-  /* scroll listeners */
+  /* מעקב גלילה */
   useEffect(() => {
     let lastY = 0;
     const onScroll = () => {
@@ -27,16 +26,16 @@ const Header: React.FC = () => {
       setScrollDirUp(y < lastY);
       lastY = y;
 
-      const doc = document.documentElement;
       const pct =
-        (y / (doc.scrollHeight - window.innerHeight || 1)) * 100;
+        (y / (document.documentElement.scrollHeight - window.innerHeight || 1)) *
+        100;
       setProgress(pct);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* lock body + esc */
+  /* נעילת גלילה + ESC */
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'auto';
     const onKey = (e: KeyboardEvent) =>
@@ -47,7 +46,6 @@ const Header: React.FC = () => {
 
   const toggleMenu = () => setIsOpen(p => !p);
 
-  /* header variants */
   const headerBg =
     isOpen
       ? 'bg-surface-base shadow-md'
@@ -66,19 +64,15 @@ const Header: React.FC = () => {
 
       {/* header */}
       <motion.header
-        className={`
-          fixed inset-x-0 z-40 transition-colors duration-300 ${headerBg}
-        `}
+        className={`fixed inset-x-0 z-40 transition-colors duration-300 ${headerBg}`}
         animate={{ y: scrollDirUp || isOpen ? 0 : -96 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
       >
         <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-          {/* לוגו */}
           <a href="#" className="z-50" aria-label="appli homepage">
             <Logo className="h-7 text-brand-gray-900" />
           </a>
 
-          {/* ניווט בדסקטופ */}
           <ul className="hidden md:flex items-center gap-x-8 lg:gap-x-12">
             {navLinks.map(link => (
               <li key={link.name}>
@@ -88,12 +82,8 @@ const Header: React.FC = () => {
                   whileHover="hover"
                 >
                   {link.name}
-                  {/* underline animation */}
                   <motion.span
-                    variants={{
-                      hover: { scaleX: 1 },
-                      initial: { scaleX: 0 },
-                    }}
+                    variants={{ hover: { scaleX: 1 }, initial: { scaleX: 0 } }}
                     initial="initial"
                     transition={{ ease: 'easeOut', duration: 0.2 }}
                     className="absolute -bottom-0.5 left-0 w-full h-0.5 bg-brand-blue-300 origin-left"
@@ -103,7 +93,6 @@ const Header: React.FC = () => {
             ))}
           </ul>
 
-          {/* כפתורי צד */}
           <div className="flex items-center gap-4 md:gap-6">
             <button
               onClick={() => openModal()}
@@ -150,7 +139,17 @@ const Header: React.FC = () => {
               role="dialog"
               aria-modal="true"
             >
-              <ul className="flex flex-col gap-y-6">
+              {/* כפתור סגירה במגירה */}
+              <motion.button
+                onClick={toggleMenu}
+                className="absolute top-6 left-6 text-brand-gray-900"
+                aria-label="סגור תפריט"
+                whileTap={{ scale: 0.9, rotate: -90 }}
+              >
+                <X size={24} />
+              </motion.button>
+
+              <ul className="flex flex-col gap-y-6 mt-8">
                 {navLinks.map(link => (
                   <li key={link.name}>
                     <a
