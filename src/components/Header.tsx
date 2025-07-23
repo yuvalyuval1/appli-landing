@@ -27,7 +27,8 @@ const Header: React.FC = () => {
       lastY = y;
 
       const pct =
-        (y / (document.documentElement.scrollHeight - window.innerHeight || 1)) *
+        (y /
+          (document.documentElement.scrollHeight - window.innerHeight || 1)) *
         100;
       setProgress(pct);
     };
@@ -73,6 +74,7 @@ const Header: React.FC = () => {
             <Logo className="h-7 text-brand-gray-900" />
           </a>
 
+          {/* ניווט בדסקטופ */}
           <ul className="hidden md:flex items-center gap-x-8 lg:gap-x-12">
             {navLinks.map(link => (
               <li key={link.name}>
@@ -86,13 +88,14 @@ const Header: React.FC = () => {
                     variants={{ hover: { scaleX: 1 }, initial: { scaleX: 0 } }}
                     initial="initial"
                     transition={{ ease: 'easeOut', duration: 0.2 }}
-                    className="absolute -bottom-0.5 left-0 w-full h-0.5 bg-brand-blue-300 origin-left"
+                    className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-blue-300 origin-left"
                   />
                 </motion.a>
               </li>
             ))}
           </ul>
 
+          {/* כפתורים צדיים */}
           <div className="flex items-center gap-4 md:gap-6">
             <button
               onClick={() => openModal()}
@@ -112,7 +115,7 @@ const Header: React.FC = () => {
               aria-expanded={isOpen}
               whileTap={{ scale: 0.9, rotate: 90 }}
             >
-              {isOpen ? <X /> : <Menu />}
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </motion.button>
           </div>
         </nav>
@@ -146,7 +149,7 @@ const Header: React.FC = () => {
                 aria-label="סגור תפריט"
                 whileTap={{ scale: 0.9, rotate: -90 }}
               >
-                <X size={24} />
+                <X className="w-6 h-6" />
               </motion.button>
 
               <ul className="flex flex-col gap-y-6 mt-8">
