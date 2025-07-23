@@ -1,10 +1,21 @@
-/* --------------------------------------------------------------------------
+/* -----------------------------------------------------------------------
    TrustBarSection.tsx
-   שורת לוגואים רצה, מותאמת מובייל/דסקטופ, RTL‑friendly, Reduced‑Motion,
-   + מונה לקוחות מתעורר בגלילה. אין תלות חיצונית מעבר ל‑Tailwind ו‑React.
-   -------------------------------------------------------------------------- */
+   -----------------------------------------------------------------------
+   • שורת לוגואים רצה (Marquee) – מהירות דינמית ונפרדת למובייל/דסקטופ.
+   • דהיית‑קצוות (Gradient mask) – RTL / LTR אוטומטי.
+   • Counter “לקוחות מרוצים” – מתעורר בגלילה (useIntersection + useCountUp).
+   • Reduced‑Motion: מכבד משתמש שמעדיף פחות אנימציות.
+   • TypeScript ✓  – ללא TS2322 (אין props בעייתיות על <svg>).
+   • אין תלות חיצונית מעבר ל‑React, Tailwind, ושלושת hooks הקיימים.
+   --------------------------------------------------------------------- */
 
-import React, { useRef, useEffect, useState, type ComponentType } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  type ComponentType,
+  type SVGProps,
+} from 'react';
 import useIntersection from '@/hooks/useIntersection';
 import { useCountUp } from '@/hooks/useCountUp';
 import {
@@ -16,81 +27,109 @@ import {
   Partner6,
 } from '@/components/Icons';
 
-/* ----------  CONFIG  ---------------------------------------------------- */
-// 1. שמות דמיוניים “אמינים”.
+/* ─────────────────────  CONFIG  ─────────────────────────────────────── */
+
+/** רשימת שותפים (שמות דמיוניים אך "אמינים") */
 const partners = [
-  { Component: Partner1, name: 'AlphaSoft' },
-  { Component: Partner2, name: 'BetaWare' },
-  { Component: Partner3, name: 'Gamma Labs' },
-  { Component: Partner4, name: 'Delta Systems' },
-  { Component: Partner5, name: 'Epsilon Tech' },
-  { Component: Partner6, name: 'ZetaCloud' },
-];
+  { Component: Partner1, label: 'AlphaSoft' },
+  { Component: Partner2, label: 'BetaWare' },
+  { Component: Partner3, label: 'Gamma Labs' },
+  { Component: Partner4, label: 'Delta Systems' },
+  { Component: Partner5, label: 'Epsilon Tech' },
+  { Component: Partner6, label: 'ZetaCloud' },
+] as const;
 
-/* כמה לוגואים נרצה בלופ כדי שלא ייגמר מהר מדי? */
-const MIN_LOGOS_IN_LOOP = 18; // ≥ 18 נראה טבעי על דסקטופ רחב
+/** כמה לוגואים לפחות בלולאה כדי שלא ייגמר מהר על צגים רחבים */
+const MIN_LOGOS_IN_LOOP = 18;
 
-/* פרופורציה מהירות (px / s)  – מהיר יותר במובייל כדי שלא “יזחל” */
+/** מהירות ברירת‑מחדל (px / s) */
 const PX_PER_SEC_DESKTOP = 40;
 const PX_PER_SEC_MOBILE  = 70;
 
-/* ----------  HELPERS  --------------------------------------------------- */
-const buildLoop = <T,>(arr: T[], minTotal: number): T[] => {
+/* ────────────────────  HELPERS  ─────────────────────────────────────── */
+
+/**
+ * משכפל מערך עד שאורכו מגיע (או עובר) למינימום מבוקש.
+ * מחזיר מערך שטוח (flat).
+ */
+function buildLoop<T>(arr: readonly T[], minTotal: number): T[] {
   const loops = Math.ceil(minTotal / arr.length);
-  // flat() ⩾ ES2019 – קיים בפרויקטי Vite/TS סטנדרטיים
-  // eslint-disable-next-line fp/no-loops
-  return Array.from({ length: loops }, () => arr).flat();
-};
+  /* eslint‑disable fp/no-loops */
+  const out: T[] = [];
+  for (let i = 0; i < loops; i += 1) out.push(...arr);
+  return out;
+}
 
-/* ----------  COMPONENT  ------------------------------------------------- */
+/* ההתאמה בין כיוון המסך ל‑translateX (%) בלולאה */
+function calcTranslatePercent(dupFactor: number): string {
+  /* dupFactor = loopPartners.length / partners.length */
+  const perc = (-100 / dupFactor).toFixed(4);
+  return `${perc}%`;
+}
+
+/* ────────────────────  CHILD  ───────────────────────────────────────── */
+
+interface LogoItemProps {
+  Icon : ComponentType<SVGProps<SVGSVGElement>>; // <svg>‑Component
+  label: string;
+}
+const LogoItem: React.FC<LogoItemProps> = ({ Icon, label }) => (
+  <div className="flex-shrink-0 w-32 mx-4 sm:w-40 sm:mx-6 flex items-center justify-center">
+    {/* לא מעבירים props ל‑SVG כדי למנוע TS 2322; עוטפים בתג span נגיש */}
+    <Icon className="h-8 sm:h-10 w-auto text-brand-gray-400 hover:text-brand-blue-300 transition-colors" />
+    <span className="sr-only">{label} logo</span>
+  </div>
+);
+
+/* ───────────────────  MAIN SECTION  ─────────────────────────────────── */
+
 const TrustBarSection: React.FC = () => {
-  /* מופעל בגלילה – 150 → 0 ב‑2 שניות */
+  /* Intersection → Counter עולה מ‑0 ל‑150 ב‑2 ש׳ */
   const [sectionRef, inView] = useIntersection({ threshold: 0.15 });
-  const clientCount         = useCountUp(inView ? 150 : 0, 2_000);
+  const clientCount          = useCountUp(inView ? 150 : 0, 2000);
 
-  /* חשב משך אנימציה (s) דינמי לגודל המסך */
-  const rowRef = useRef<HTMLDivElement>(null);
-  const [duration, setDuration] = useState(20);
-
-  /* בחר כמה פעמים לשכפל כדי להגיע ל‑MIN_LOGOS_IN_LOOP */
+  /* בניית לולאת logos */
   const loopPartners = buildLoop(partners, MIN_LOGOS_IN_LOOP);
+  const dupFactor    = loopPartners.length / partners.length; // כמה פעמים שוכפל
+
+  /* חישוב דינמי ל‑animation‑duration */
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [duration, setDuration] = useState(20); // fallback
 
   useEffect(() => {
     if (!rowRef.current) return;
 
-    const baseWidth   = rowRef.current.scrollWidth / (loopPartners.length / partners.length); // רוחב “סט” אחד
-    const isMobile    = window.innerWidth < 640; // Tailwind sm < 640
+    const baseWidth   = rowRef.current.scrollWidth / dupFactor; // רוחב "סט" 1
+    const isMobile    = window.innerWidth < 640;                // Tailwind sm
     const pxPerSecond = isMobile ? PX_PER_SEC_MOBILE : PX_PER_SEC_DESKTOP;
-    const seconds     = Math.max(baseWidth / pxPerSecond, 8); // הבטחת ≥ 8 s
+    const sec         = Math.max(baseWidth / pxPerSecond, 8);   // ≥ 8 s
 
-    setDuration(seconds);
-  }, [loopPartners]);
+    setDuration(sec);
+  }, [dupFactor]);
 
-  /* ----------  RENDER  -------------------------------------------------- */
+  /* ────────────────  RENDER  ────────────────────────────────────────── */
   return (
     <section
       id="trust"
       ref={sectionRef}
       className="relative bg-surface-base py-16 sm:py-24 overflow-hidden"
     >
-      {/* Fade edges – מתאים RTL / LTR אוטומטית */}
+      {/* Fade edges  (RTL aware) */}
       <div className="pointer-events-none absolute inset-y-0 left-0  w-16 sm:w-24 bg-gradient-to-r from-surface-base to-transparent rtl:right-0 rtl:left-auto" />
       <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-24 bg-gradient-to-l from-surface-base to-transparent rtl:left-0  rtl:right-auto" />
 
       <div className="container mx-auto px-6 text-center">
-        {/* כותרת + מונה דינמי */}
+        {/* כותרת + מונה */}
         <h2 className="text-3xl md:text-4xl font-bold text-brand-gray-900">
           מעל{' '}
-          <span className="text-brand-lilac-300">
-            {Math.round(clientCount)}+
-          </span>{' '}
+          <span className="text-brand-lilac-300">{Math.round(clientCount)}+</span>{' '}
           לקוחות מרוצים
         </h2>
         <p className="mt-4 text-lg text-brand-gray-700">
           החברות המובילות כבר סומכות עלינו.
         </p>
 
-        {/* מרקיז – flex רציף */}
+        {/* מרקיז */}
         <div className="relative mt-12 select-none">
           <div
             ref={rowRef}
@@ -98,47 +137,28 @@ const TrustBarSection: React.FC = () => {
             className="flex rtl:flex-row-reverse will-change-transform"
             style={{ animation: `marquee ${duration}s linear infinite` }}
           >
-            {loopPartners.map(({ Component, name }, idx) => (
-              <LogoItem
-                key={idx}
-                Icon={Component}
-                label={name}
-              />
+            {loopPartners.map(({ Component, label }, idx) => (
+              <LogoItem key={idx} Icon={Component} label={label} />
             ))}
           </div>
         </div>
       </div>
 
-      {/* CSS מוטמע – אין styled‑jsx ולכן אין TS error */}
+      {/* CSS מוטמע – ללא styled‑jsx → אין TS 2322 */}
       <style>{`
+        /* Reduced‑Motion respect */
         @media (prefers-reduced-motion: reduce) {
           [data-marquee] { animation: none !important; }
         }
 
+        /* דינמי לפי dupFactor */
         @keyframes marquee {
           from { transform: translateX(0); }
-          to   { transform: translateX(-${(100 / (loopPartners.length / partners.length)).toFixed(4)}%); }
-          /* ‎-X% בדיוק יחסי לכמה “סטים” יש, כך שהלופ חלק */
+          to   { transform: translateX(${calcTranslatePercent(dupFactor)}); }
         }
       `}</style>
     </section>
   );
 };
-
-/* ----------  CHILD  ---------------------------------------------------- */
-interface LogoItemProps {
-  Icon : ComponentType<React.SVGProps<SVGSVGElement>>;
-  label: string;
-}
-
-const LogoItem: React.FC<LogoItemProps> = ({ Icon, label }) => (
-  <div className="flex-shrink-0 w-32   mx-4   sm:w-40 sm:mx-6 flex items-center justify-center">
-    <Icon
-      className="h-8 sm:h-10 w-auto text-brand-gray-400 hover:text-brand-blue-300 transition-colors"
-      aria-label={`${label} logo`}
-      title={label}
-    />
-  </div>
-);
 
 export default TrustBarSection;
