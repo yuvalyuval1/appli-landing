@@ -13,6 +13,7 @@
     "@headlessui/react": "^2.1.2",
     "@vercel/analytics": "^1.5.0",
     "@vercel/node": "^5.3.6",
+    "@vercel/speed-insights": "^1.2.0",
     "framer-motion": "^11.3.8",
     "nodemailer": "^6.9.14",
     "react": "^18.3.1",
